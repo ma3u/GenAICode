@@ -1,1 +1,132 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dress Recommendation App</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { color: #333; }
+        .slider-container { margin-bottom: 20px; }
+        input[type="range"] { width: 100%; }
+        #recommendations { margin-top: 20px; }
+        .warning { color: #ff0000; font-weight: bold; }
+        .recommendation-image { max-width: 200px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Dress Recommendation App</h1>
+    <p>Select temperature and humidity to get dress recommendations.</p>
+    
+    <div class="slider-container">
+        <label for="temperature">Temperature: <span id="temp-value">20</span>°C</label>
+        <input type="range" id="temperature" min="-50" max="40" value="20" step="1">
+    </div>
+    
+    <div class="slider-container">
+        <label for="humidity">Humidity: <span id="humidity-value">50</span>%</label>
+        <input type="range" id="humidity" min="0" max="100" value="50" step="1">
+    </div>
+    
+    <div id="recommendations"></div>
 
+    <script>
+        const tempSlider = document.getElementById('temperature');
+        const humiditySlider = document.getElementById('humidity');
+        const tempValue = document.getElementById('temp-value');
+        const humidityValue = document.getElementById('humidity-value');
+        const recommendationsDiv = document.getElementById('recommendations');
+
+        const dressMap = [
+            // -50°C to -41°C
+            {
+                items: ['heavy duty thermal suit', 'thick thermal gloves', 'snow boots', 'face mask', 'goggles', 'thick winter hat', 'thermal balaclava'],
+                image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+            },
+            // -40°C to -31°C
+            {
+                items: ['extreme winter coat', 'heavy layering', 'insulated boots', 'face mask', 'goggles', 'thermal earmuffs', 'insulated pants'],
+                image: "https://images.unsplash.com/photo-1517825738774-7de9363ef735?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+            },
+            // -30°C to -21°C
+            {
+                items: ['insulated parka', 'heavy sweater', 'thermal pants', 'winter boots', 'face mask', 'goggles', 'thick mittens'],
+                image: "https://images.unsplash.com/photo-1611931960487-3adc50b3e5a9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80"
+            },
+            // -20°C to -11°C
+            {
+                items: ['heavy winter coat', 'thermal underwear', 'snow boots', 'thick scarf', 'warm hat', 'insulated gloves'],
+                image: "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+            },
+            // -10°C to -1°C
+            {
+                items: ['winter coat', 'sweater', 'warm pants', 'winter boots', 'scarf', 'gloves'],
+                image: "https://images.unsplash.com/photo-1548883354-7622d03aca27?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80"
+            },
+            // 0°C to 9°C
+            {
+                items: ['heavy jacket', 'warm sweater', 'jeans', 'ankle boots', 'light scarf', 'beanie'],
+                image: "https://images.unsplash.com/photo-1520975661595-6453be3f7070?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80"
+            },
+            // 10°C to 19°C
+            {
+                items: ['light jacket', 'long-sleeve shirt', 'trousers', 'sneakers', 'light scarf'],
+                image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80"
+            },
+            // 20°C to 29°C
+            {
+                items: ['t-shirt', 'light pants or skirt', 'sandals or sneakers', 'sunglasses', 'sunscreen'],
+                image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+            },
+            // 30°C to 40°C
+            {
+                items: ['light sundress or shorts', 'tank top', 'sandals', 'sunhat', 'sunglasses', 'high SPF sunscreen'],
+                image: "https://images.unsplash.com/photo-1601924994987-69e26d50dc26?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+            }
+        ];
+
+        function updateRecommendations() {
+            const temp = parseInt(tempSlider.value);
+            const humidity = parseInt(humiditySlider.value);
+            
+            const dressIndex = Math.floor((temp + 50) / 10);
+            const dresses = dressMap[dressIndex];
+
+            let humidityRecommendation = '';
+            if (humidity < 30) {
+                humidityRecommendation = 'Consider moisturizing lotion for dry skin.';
+            } else if (humidity > 70) {
+                humidityRecommendation = 'Choose breathable, moisture-wicking fabrics.';
+            }
+
+            let sunProtectionWarning = '';
+            if (temp > 30) {
+                sunProtectionWarning = '<p class="warning">WARNING: High UV risk! Apply sunscreen regularly, wear protective clothing, and seek shade during peak hours (10 AM - 4 PM).</p>';
+            }
+
+            recommendationsDiv.innerHTML = `
+                <h2>Recommended Dresses for ${temp}°C and ${humidity}% humidity:</h2>
+                <ul>${dresses.items.map(dress => `<li>${dress}</li>`).join('')}</ul>
+                <img src="${dresses.image}" alt="Dress recommendation" class="recommendation-image">
+                <p>${humidityRecommendation}</p>
+                ${sunProtectionWarning}
+            `;
+        }
+
+        tempSlider.oninput = function() {
+            tempValue.textContent = this.value;
+            updateRecommendations();
+        }
+
+        humiditySlider.oninput = function() {
+            humidityValue.textContent = this.value;
+            updateRecommendations();
+        }
+
+        updateRecommendations();
+    </script>
+</body>
+</html>
+
+```
